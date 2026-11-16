@@ -18,6 +18,8 @@ https://aisac-id.github.io/chizuru-mini-games/
 
 ## Teknis
 Static HTML + JS, tanpa server. Buka `index.html` langsung atau via GitHub Pages.
+
+
 ---
 
 ## Brand & Promotion Kit
