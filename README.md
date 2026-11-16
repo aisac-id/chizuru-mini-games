@@ -1,23 +1,25 @@
-# Chizuru Mini Games
-
 <p align="center">
   <img src="promo/banner.png" alt="Chizuru Mini Games banner" width="100%">
 </p>
 
+# Chizuru Mini Games
 
-Tiga mini-game santai dengan Chizuru Mizuhara:
+> Chizuru Mizuhara fan-art game (100 world traditional costumes)
 
-1. **Memory Match** — cari 8 pasang kartu kostum, hitung langkah.
-2. **Sliding Puzzle** — puzzle geser 3×3, 4 pilihan gambar, tahan untuk preview.
-3. **Idle Clicker** — tap untuk poin, beli upgrade (sepatu/sepeda/pesawat), unlock galeri kostum di tiap destinasi.
+## Tentang Chizuru Mini Games
 
-Progres disimpan di browser (localStorage).
+Chizuru Mizuhara fan-art game (100 world traditional costumes)
 
-## Mainkan
-https://aisac-id.github.io/chizuru-mini-games/
+## Fitur Utama
 
-## Teknis
-Static HTML + JS, tanpa server. Buka `index.html` langsung atau via GitHub Pages.
+- Gameplay langsung di browser
+- Level dan tantangan bertingkat
+- Skor dan papan peringkat
+- Hadiah dan koleksi
+
+## Teknologi
+
+`HTML`
 
 
 ---
