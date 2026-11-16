@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Chizuru Mini-Games</title>
+<style>
+:root{--bg:#120e1e;--card:#221a36;--accent:#ff5c8a;--gold:#ffc857;--text:#fff}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.wrap{max-width:560px;margin:0 auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+h1{font-size:1.2rem;color:var(--accent);text-align:center}
+.screen{display:none;flex-direction:column;gap:12px}
+.screen.on{display:flex}
+.hub{display:grid;gap:10px}
+.hub button{padding:18px;border-radius:16px;border:2px solid #3a2f52;background:var(--card);color:var(--text);text-align:left;cursor:pointer}
+.hub b{display:block;font-size:1rem;color:var(--gold);margin-bottom:4px}
+.hub span{font-size:.78rem;opacity:.75}
+.back{padding:10px;border-radius:12px;border:none;background:var(--card);color:var(--text);cursor:pointer}
+.hud{display:flex;justify-content:space-between;font-size:.85rem}
+.hud b{color:var(--gold)}
+.mem{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.mcard{aspect-ratio:2/3;border-radius:12px;position:relative;cursor:pointer;perspective:600px}
+.mcard .in{position:absolute;inset:0;transition:transform .35s;transform-style:preserve-3d}
+.mcard.open .in,.mcard.done .in{transform:rotateY(180deg)}
+.mcard .f,.mcard .b{position:absolute;inset:0;border-radius:12px;backface-visibility:hidden;overflow:hidden}
+.mcard .f{background:linear-gradient(135deg,#3a2a55,#221a36);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:var(--accent)}
+.mcard .b{transform:rotateY(180deg);border:2px solid var(--gold)}
+.mcard .b img{width:100%;height:100%;object-fit:cover;object-position:top}
+.mcard.done .b{border-color:#4ade80}
+.puz{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;aspect-ratio:2/3;max-height:60vh;margin:0 auto;width:100%}
+.ptile{border-radius:8px;background-size:300% 300%;cursor:pointer;border:1px solid #0006}
+.ptile.empty{background:none!important;border:2px dashed #3a2f52;cursor:default}
+.pcontrols{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.pcontrols button,.pcontrols select{padding:10px;border-radius:10px;border:none;background:var(--card);color:var(--text);cursor:pointer}
+.clicker{display:flex;flex-direction:column;gap:10px;align-items:center}
+.tap{width:200px;height:260px;border-radius:20px;overflow:hidden;border:3px solid var(--accent);cursor:pointer;position:relative}
+.tap img{width:100%;height:100%;object-fit:cover;object-position:top;pointer-events:none}
+.tap:active{transform:scale(.96)}
+.miles{font-size:1.3rem;color:var(--gold);font-weight:800}
+.rate{font-size:.78rem;opacity:.7}
+.ups{display:grid;gap:8px;width:100%}
+.ups button{display:flex;justify-content:space-between;padding:12px;border-radius:12px;border:2px solid #3a2f52;background:var(--card);color:var(--text);cursor:pointer;font-size:.85rem}
+.ups button:disabled{opacity:.45}
+.gal{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}
+.gal .g{border-radius:10px;overflow:hidden;border:2px solid #3a2f52;aspect-ratio:2/3}
+.gal img{width:100%;height:100%;object-fit:cover;object-position:top}
+.gal .g.lock{display:flex;align-items:center;justify-content:center;color:#555;font-size:.7rem;text-align:center;padding:4px}
+.win{position:fixed;inset:0;background:#000c;display:none;align-items:center;justify-content:center;z-index:9}
+.win.on{display:flex}
+.win .box{background:var(--card);border:2px solid var(--gold);border-radius:20px;padding:26px;text-align:center;max-width:320px}
+.win h2{color:var(--gold);margin-bottom:8px}
+.win p{font-size:.9rem;margin-bottom:14px}
+.win button{padding:12px 22px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Chizuru Mini-Games</h1>
+<div class="screen on" id="scr-hub"><div class="hub">
+<button onclick="go('mem');memStart()"><b>Memory Match</b><span>Cocokkan pasangan kartu kostum Chizuru. 8 pasang, adu ingatan!</span></button>
+<button onclick="go('puz');puzStart()"><b>Sliding Puzzle</b><span>Geser ubin 3×3 sampai gambar Chizuru utuh kembali.</span></button>
+<button onclick="go('clk')"><b>Idle World Tour</b><span>Tap untuk miles, beli upgrade, unlock 6 destinasi bersama Chizuru.</span></button>
+</div></div>
+
+<div class="screen" id="scr-mem">
+<button class="back" onclick="go('hub')">← Kembali</button>
+<div class="hud"><span>Langkah: <b id="mem-moves">0</b></span><span>Pasangan: <b id="mem-pairs">0</b>/8</span></div>
+<div class="mem" id="mem"></div>
+</div>
+
+<div class="screen" id="scr-puz">
+<button class="back" onclick="go('hub')">← Kembali</button>
+<div class="hud"><span>Langkah: <b id="puz-moves">0</b></span><span id="puz-state"></span></div>
+<div class="puz" id="puz"></div>
+<div class="pcontrols">
+<select id="puz-img" onchange="puzStart()">
+<option value="001-kebaya-jawa.jpg">Kebaya Jawa</option>
+<option value="016-papua-rumbai.jpg">Papua Rumbai</option>
+<option value="079-hawaii-hula.jpg">Hawaii Hula</option>
+<option value="098-kimono-furisode.jpg">Kimono</option>
+</select>
+<button onclick="puzStart()">Acak Ulang</button>
+<button id="puz-prev" onmousedown="prev(true)" onmouseup="prev(false)" ontouchstart="prev(true)" ontouchend="prev(false)">Lihat Gambar</button>
+</div>
+</div>
+
+<div class="screen" id="scr-clk">
+<button class="back" onclick="go('hub')">← Kembali</button>
+<div class="clicker">
+<div class="miles" id="clk-miles">0 miles</div>
+<div class="rate" id="clk-rate"></div>
+<div class="tap" onclick="tap()"><img src="assets/001-kebaya-jawa.jpg" alt="tap"></div>
+<div class="ups" id="ups"></div>
+<div class="gal" id="gal"></div>
+</div>
+</div>
+</div>
+<div class="win" id="win"><div class="box"><h2 id="win-t">Menang!</h2><p id="win-p"></p><button onclick="winClose()">Lanjut</button></div></div>
+<script>
+const $=id=>document.getElementById(id);
+function go(s){document.querySelectorAll('.screen').forEach(e=>e.classList.remove('on'));$('scr-'+s).classList.add('on')}
+function win(t,p){$('win-t').textContent=t;$('win-p').textContent=p;$('win').classList.add('on')}
+function winClose(){$('win').classList.remove('on')}
+/* ---- memory ---- */
+const MEM_IMGS=["001-kebaya-jawa.jpg","004-kebaya-bali.jpg","016-papua-rumbai.jpg","017-asmat.jpg","047-tennis.jpg","079-hawaii-hula.jpg","097-hanbok-korea.jpg","098-kimono-furisode.jpg"];
+let mOpen=[],mLock=false,mMoves=0,mPairs=0;
+function memStart(){
+ mOpen=[];mLock=false;mMoves=0;mPairs=0;$('mem-moves').textContent=0;$('mem-pairs').textContent=0;
+ const deck=[...MEM_IMGS,...MEM_IMGS].sort(()=>Math.random()-.5);
+ const g=$('mem');g.innerHTML='';
+ deck.forEach(src=>{
+  const c=document.createElement('div');c.className='mcard';c.dataset.src=src;
+  c.innerHTML='<div class="in"><div class="f">?</div><div class="b"><img src="assets/'+src+'"></div></div>';
+  c.onclick=()=>memFlip(c);g.appendChild(c);
+ });
+}
+function memFlip(c){
+ if(mLock||c.classList.contains('open')||c.classList.contains('done'))return;
+ c.classList.add('open');mOpen.push(c);
+ if(mOpen.length===2){
+  mMoves++;$('mem-moves').textContent=mMoves;mLock=true;
+  const [a,b]=mOpen;
+  if(a.dataset.src===b.dataset.src){
+   setTimeout(()=>{a.classList.add('done');b.classList.add('done');a.classList.remove('open');b.classList.remove('open');mOpen=[];mLock=false;mPairs++;$('mem-pairs').textContent=mPairs;
+    if(mPairs===8)win('Memory selesai!','Semua pasangan cocok dalam '+mMoves+' langkah. Chizuru tersenyum bangga.');},350);
+  }else setTimeout(()=>{a.classList.remove('open');b.classList.remove('open');mOpen=[];mLock=false},700);
+ }
+}
+/* ---- puzzle ---- */
+let P=[],pMoves=0,pImg='';
+function puzStart(){
+ pImg=$('puz-img').value;pMoves=0;$('puz-moves').textContent=0;$('puz-state').textContent='';
+ P=[0,1,2,3,4,5,6,7,8];
+ let empty=8;
+ for(let i=0;i<120;i++){
+  const nb=[empty-3,empty+3,empty-1,empty+1].filter(x=>x>=0&&x<9&&!(empty%3===0&&x===empty-1)&&!(empty%3===2&&x===empty+1));
+  const pick=nb[Math.floor(Math.random()*nb.length)];
+  [P[empty],P[pick]]=[P[pick],P[empty]];empty=pick;
+ }
+ puzRender();
+}
+function puzRender(){
+ const g=$('puz');g.innerHTML='';
+ P.forEach((tile,pos)=>{
+  const d=document.createElement('div');
+  if(tile===8){d.className='ptile empty';}
+  else{
+   d.className='ptile';d.style.backgroundImage='url(assets/'+pImg+')';
+   d.style.backgroundPosition=(tile%3*50)+'% '+Math.floor(tile/3*50)+'%';
+   d.onclick=()=>puzMove(pos);
+  }
+  g.appendChild(d);
+ });
+}
+function puzMove(pos){
+ const e=P.indexOf(8);
+ const ok=(Math.abs(pos-e)===3)||(Math.abs(pos-e)===1&&Math.floor(pos/3)===Math.floor(e/3));
+ if(!ok)return;
+ [P[pos],P[e]]=[P[e],P[pos]];pMoves++;$('puz-moves').textContent=pMoves;puzRender();
+ if(P.every((t,i)=>t===i)){ $('puz-state').textContent='SELESAI!';win('Puzzle selesai!','Gambar utuh dalam '+pMoves+' langkah. Chizuru: "Kamu hebat!"');}
+}
+function prev(on){
+ document.querySelectorAll('.ptile').forEach((d,i)=>{
+  if(on){d.classList.remove('empty');d.style.backgroundImage='url(assets/'+pImg+')';d.style.backgroundPosition=(i%3*50)+'% '+Math.floor(i/3*50)+'%';}
+  else puzRender();
+ });
+}
+/* ---- clicker ---- */
+let C=JSON.parse(localStorage.getItem('mg_clk')||'null')||{m:0,tap:1,shoe:0,bike:0,plane:0};
+const DEST=[[0,"001-kebaya-jawa.jpg","Jawa"],[100,"016-papua-rumbai.jpg","Papua"],[500,"079-hawaii-hula.jpg","Hawaii"],[2000,"097-hanbok-korea.jpg","Korea"],[8000,"092-spain-flamenco.jpg","Spanyol"],[20000,"098-kimono-furisode.jpg","Jepang"]];
+function csave(){localStorage.setItem('mg_clk',JSON.stringify(C))}
+function auto(){return C.bike*1+C.plane*10}
+function tap(){C.m+=C.tap;clkRender();csave()}
+function cost(k){return Math.floor({shoe:50,bike:100,plane:500}[k]*Math.pow({shoe:1.6,bike:1.7,plane:1.8}[k],C[k]))}
+function buy(k){const c=cost(k);if(C.m<c)return;C.m-=c;C[k]++;if(k==='shoe')C.tap++;clkRender();csave()}
+function clkRender(){
+ $('clk-miles').textContent=Math.floor(C.m)+' miles';
+ $('clk-rate').textContent='+'+C.tap+'/tap · +'+auto()+'/detik';
+ const u=$('ups');u.innerHTML='';
+ [['shoe','Sepatu Lari','+1/tap'],['bike','Sepeda','+1/detik'],['plane','Pesawat','+10/detik']].forEach(([k,n,d])=>{
+  const b=document.createElement('button');const c=cost(k);
+  b.innerHTML='<span>'+n+' (Lv'+C[k]+') '+d+'</span><b>'+c+' miles</b>';
+  b.disabled=C.m<c;b.onclick=()=>buy(k);u.appendChild(b);
+ });
+ const g=$('gal');g.innerHTML='';
+ DEST.forEach(([th,f,n])=>{
+  const d=document.createElement('div');
+  if(C.m>=th||C['u'+th]){C['u'+th]=1;d.className='g';d.innerHTML='<img src="assets/'+f+'" title="'+n+'">';}
+  else{d.className='g lock';d.textContent=n+' — '+th+' miles';}
+  g.appendChild(d);
+ });
+}
+setInterval(()=>{if($('scr-clk').classList.contains('on')){C.m+=auto()/4;clkRender();csave()}},250);
+clkRender();
+</script>
+</body>
+</html>
