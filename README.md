@@ -10,7 +10,7 @@
 
 Chizuru Mizuhara fan-art game (100 world traditional costumes)
 
-## Fitur Utama
+## Fitur yang Direncanakan
 
 - Gameplay langsung di browser
 - Level dan tantangan bertingkat
