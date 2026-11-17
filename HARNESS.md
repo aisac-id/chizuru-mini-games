@@ -77,7 +77,7 @@ HARNESS.md AGENTS.md LICENSE NOTICE SECURITY.md ASSETS.md .env.example .gitignor
 | `PORT` | Port server statis lokal (`scripts/serve.mjs`); di-set otomatis oleh `playwright.config.mjs` dari `PLAYWRIGHT_BASE_URL` | `4173` |
 | `HOST` | Alamat bind server statis lokal; default loopback | `127.0.0.1` |
 
-Tanpa env runtime untuk game statis. Untuk tooling lokal, `PLAYWRIGHT_BASE_URL` wajib di-set (salin dari `.env.example`); `HOST`/`PORT` diturunkan otomatis oleh `playwright.config.mjs`. `.env` lokal di-gitignore; jangan commit nilai asli.
+Tanpa env runtime untuk game statis. Untuk tooling lokal, salin `.env.example` ke `.env`; `npm run test:e2e` memuat `.env` otomatis (`node --env-file-if-exists`, butuh Node ≥ 22.9). `PLAYWRIGHT_BASE_URL` wajib ada; `HOST`/`PORT` diturunkan otomatis oleh `playwright.config.mjs`. `.env` lokal di-gitignore; jangan commit nilai asli.
 
 ## 5. Definition of Done (setiap PR)
 

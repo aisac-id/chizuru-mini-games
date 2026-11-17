@@ -15,7 +15,7 @@ export default defineConfig({
   webServer: {
     command: 'node scripts/serve.mjs',
     url: baseURL,
-    env: { HOST: serverURL.hostname, PORT: serverURL.port || '80' },
+    env: { HOST: serverURL.hostname, PORT: serverURL.port || (serverURL.protocol === 'https:' ? '443' : '80') },
     reuseExistingServer: !process.env.CI,
   },
   projects: [{ name: 'chromium', use: { browserName: 'chromium' } }],
