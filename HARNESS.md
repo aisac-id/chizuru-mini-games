@@ -61,7 +61,7 @@ Perubahan harness hanya lewat PR `chore/harness-*`. Semua issue/PR wajib merujuk
 ```
 index.html          # shell + game saat ini (maks 300 LoC)
 src/                # modul ES baru (maks 300 LoC/file) — tumbuh saat modularisasi
-assets/             # gambar kostum (AVIF/WebP, ≤50 KB/aset)
+assets/             # gambar kostum (AVIF ≤50 KB, fallback WebP ≤70 KB/aset)
 promo/              # brand kit publik
 scripts/            # tooling lokal: serve, lint, scan (Node, tanpa deps runtime)
 tests/e2e/          # Playwright smoke + alur inti per game

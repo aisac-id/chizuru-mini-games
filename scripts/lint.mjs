@@ -12,14 +12,23 @@ const FORBIDDEN = [
 ];
 
 export function blocksPinchZoom(html) {
-  const m =
-    html.match(/<meta[^>]*name=["']viewport["'][^>]*content=["']([^"']*)["']/i) ||
-    html.match(/<meta[^>]*content=["']([^"']*)["'][^>]*name=["']viewport["']/i);
-  if (!m) return false;
-  const content = m[1];
-  // HARNESS #14 (strict): any maximum-scale declaration or user-scalable=no/0 is rejected.
-  if (/maximum-scale\s*=/i.test(content)) return true;
-  return /user-scalable\s*=\s*(no|0)\b/i.test(content);
+  // Scan EVERY meta tag; parse attributes with or without quotes and spaces around '='.
+  const metaRe = /<meta\b[^>]*>/gi;
+  let m;
+  while ((m = metaRe.exec(html)) !== null) {
+    const attrs = {};
+    const attrRe = /([a-zA-Z-]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/g;
+    let a;
+    while ((a = attrRe.exec(m[0])) !== null) {
+      attrs[a[1].toLowerCase()] = a[2] ?? a[3] ?? a[4] ?? '';
+    }
+    if ((attrs.name || '').toLowerCase() !== 'viewport') continue;
+    const content = attrs.content || '';
+    // HARNESS #14 (strict): any maximum-scale declaration or user-scalable=no/0 is rejected.
+    if (/maximum-scale\s*=/i.test(content)) return true;
+    if (/user-scalable\s*=\s*(no|0)\b/i.test(content)) return true;
+  }
+  return false;
 }
 
 export function countLines(text) {
