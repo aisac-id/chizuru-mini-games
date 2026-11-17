@@ -1,5 +1,15 @@
 # Chizuru Mini Games
 
+<p align="center"><img src="promo/logo.png" width="96" alt="logo"></p>
+
+![Key art Mini Games](promo/hero.jpg)
+
+| Software Box | Poster |
+|---|---|
+| ![Box](promo/box.jpg) | ![Poster](promo/poster.jpg) |
+
+> Promotion kit (logo, box, poster, hero, video suite) ada di folder `promo/` dan arsip `chizuru-promo-kit.zip`.
+
 Tiga mini-game santai dengan Chizuru Mizuhara:
 
 1. **Memory Match** — cari 8 pasang kartu kostum, hitung langkah.
