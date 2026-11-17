@@ -1,0 +1,21 @@
+# Local env (never commit real values)
+.env
+.env.*
+!.env.example
+
+# Internal confidential documents — must never enter the repo
+Operation/
+
+# Node / tooling
+node_modules/
+*.log
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
+# OS noise
+.DS_Store
+Thumbs.db

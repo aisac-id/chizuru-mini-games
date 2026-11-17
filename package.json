@@ -1,0 +1,16 @@
+{
+  "name": "chizuru-mini-games",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Fan-made static HTML mini-games. Code is MIT; characters and fan-art assets are third-party IP (see NOTICE).",
+  "scripts": {
+    "serve": "node scripts/serve.mjs",
+    "lint": "node scripts/lint.mjs",
+    "scan": "node scripts/check-hardcode.mjs",
+    "test:e2e": "node --env-file-if-exists=.env node_modules/@playwright/test/cli.js test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1"
+  }
+}

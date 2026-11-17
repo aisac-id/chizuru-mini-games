@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: Lint (size limit + forbidden patterns + viewport zoom)
+        run: node scripts/lint.mjs
+      - name: Tooling self-test (gate patterns)
+        run: node tests/tooling-selftest.mjs
+      - name: Anti-hardcode scan
+        run: node scripts/check-hardcode.mjs
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      HOST: 127.0.0.1
+      PORT: '4173'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install (frozen lockfile)
+        run: npm ci
+      - name: Dependency audit (fail on high/critical)
+        run: npm audit --audit-level=high
+      - name: Install Playwright chromium
+        run: npx playwright install --with-deps chromium
+      - name: Configure test base URL from env
+        run: echo "PLAYWRIGHT_BASE_URL=http://${HOST}:${PORT}" >> "$GITHUB_ENV"
+      - name: Run e2e tests
+        run: npm run test:e2e
+      - name: Upload test report on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
