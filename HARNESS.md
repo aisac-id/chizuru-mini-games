@@ -16,7 +16,7 @@ Perubahan harness hanya lewat PR `chore/harness-*`. Semua issue/PR wajib merujuk
 
 ### Kode & arsitektur
 1. **Maks 300 LoC per file** (`.js/.mjs/.css/.html`, termasuk komentar). Bila perubahan membuat file melebihi 300, pecah jadi modul di PR yang sama.
-2. Kode JS baru: **ES modules** (`import`/`export`), vanilla, tanpa framework, tanpa CDN eksternal, font `system-ui`, ikon SVG inline.
+2. Kode JS baru: **ES modules** (`import`/`export`), vanilla, tanpa framework, tanpa CDN eksternal, ikon SVG inline. Font: `system-ui` dipertahankan sebagai pengecualian legacy baseline; standar tipografi UI baru (Versi B) menunggu keputusan Head of Frontend (eskalasi via GM/CTO) — bukan redesign di PR perbaikan.
 3. **DILARANG**: `eval`, `new Function`, remote code, jQuery/lodash/moment, library > 50 KB tanpa persetujuan Leader.
 4. Identifier, komentar kode, dan commit message: **English** (Conventional Commits, rujuk nomor issue). Dokumen proses & teks UI: Bahasa Indonesia.
 5. Semua `JSON.parse` atas data eksternal/localStorage wajib `try/catch` dengan fallback aman.
@@ -30,16 +30,16 @@ Perubahan harness hanya lewat PR `chore/harness-*`. Semua issue/PR wajib merujuk
 11. Sebelum push: jalankan `C:\Users\Acer\.aisac\no-hardcode.cmd` dan tempel hasil **LULUS** di deskripsi PR. CI juga menjalankan `scripts/check-hardcode.mjs`.
 
 ### Aksesibilitas — WCAG 2.1 AA
-12. Semua kontrol interaktif dapat dioperasikan keyboard (Tab/Enter/Space/panah) dan punya nama aksesibel (`button`/`aria-label`).
+12. Semua kontrol interaktif dapat dioperasikan keyboard (Tab/Enter/Space/panah) dan punya nama aksesibel (`button`/`aria-label`). Halaman wajib punya atribut `lang` yang benar pada `<html>`.
 13. Kontras teks ≥ 4.5:1; focus visible; target sentuh ≥ 44×44 px.
-14. **Pinch-zoom dilarang diblokir** (`viewport` tanpa `maximum-scale`/`user-scalable=no`).
+14. **Pinch-zoom dilarang diblokir**: gate lint menolak keberadaan `maximum-scale` apa pun (termasuk nilai ≥2 — kebijakan ketat agar gate tidak ambigu) dan `user-scalable=no/0` (case-insensitive) pada meta viewport.
 15. Modal menang = `role="dialog"`/`<dialog>` dengan focus trap, Esc untuk tutup, fokus kembali ke pemicu.
 16. Perubahan skor/status diumumkan lewat `aria-live` seperlunya; gambar punya `alt` bermakna.
 
 ### Performance budget
-17. Payload awal hub (HTML+CSS+JS+gambar first-view) **≤ 300 KB** transfer (baseline lama 579 KiB; issue #9).
-18. Gambar kostum: master 720×1080, format **AVIF/WebP ≤ 50 KB** per aset; `loading="lazy"` untuk gambar di luar first-view; `width`/`height` eksplisit (CLS).
-19. Core Web Vitals (Lighthouse mobile): **LCP ≤ 2.5 s, CLS ≤ 0.1, INP/TBT ≤ 200 ms**.
+17. Payload awal hub **≤ 300 KB** adalah batas umum maksimum; AC issue #9 lebih ketat (**≤ 110 KB**) dan mengikat untuk optimasi hub — lulus = memenuhi keduanya. Dihitung cold-load: semua resource yang benar-benar diunduh, termasuk gambar layar tersembunyi bila tidak lazy-load. Satuan: KB = 1000 byte (transfer), KiB = 1024 byte. Baseline lama 579 KiB.
+18. Gambar kostum: master 720×1080 **AVIF ≤ 50 KB** dengan fallback **WebP ≤ 70 KB** (AC #9); thumb 240×360 ≤ 15 KB, card 400×600 ≤ 40 KB; `loading="lazy"` + `decoding="async"` untuk gambar di luar first-view; `width`/`height` eksplisit (CLS).
+19. Gate lab: Lighthouse mobile, LCP ≤ 2,5 s, CLS ≤ 0,1, TBT ≤ 200 ms. Gunakan cold-cache dan catat versi Lighthouse, profil perangkat, CPU/network throttling serta route yang diuji agar hasil dapat diulang. Target field bila CrUX/RUM tersedia: INP ≤ 200 ms, LCP ≤ 2,5 s, CLS ≤ 0,1 pada persentil ke-75; ketiadaan data field dilaporkan sebagai belum terukur, bukan gagal maupun lulus. TBT adalah indikator lab untuk responsivitas, bukan pengukuran atau bukti kelulusan INP. Repo ini tidak diwajibkan menambah RUM untuk memenuhi gate.
 20. Tanpa error console pada alur normal.
 
 ### Keamanan & legal
@@ -74,10 +74,14 @@ HARNESS.md AGENTS.md LICENSE NOTICE SECURITY.md ASSETS.md .env.example .gitignor
 | Nama | Fungsi | Contoh (palsu/lokal) |
 |---|---|---|
 | `PLAYWRIGHT_BASE_URL` | Base URL test e2e lokal | `http://127.0.0.1:4173` |
+| `PORT` | Port server statis lokal (`scripts/serve.mjs`); di-set otomatis oleh `playwright.config.mjs` dari `PLAYWRIGHT_BASE_URL` | `4173` |
+| `HOST` | Alamat bind server statis lokal; default loopback | `127.0.0.1` |
 
-Tanpa env runtime untuk game statis. `.env` lokal di-gitignore; jangan commit nilai asli.
+Tanpa env runtime untuk game statis. Untuk tooling lokal, `PLAYWRIGHT_BASE_URL` wajib di-set (salin dari `.env.example`); `HOST`/`PORT` diturunkan otomatis oleh `playwright.config.mjs`. `.env` lokal di-gitignore; jangan commit nilai asli.
 
 ## 5. Definition of Done (setiap PR)
+
+Aksesibilitas dan performance budget wajib terpenuhi pada lingkup yang disentuh PR. Setiap PR dilarang menambah pelanggaran atau memperburuk baseline. Jika area yang disentuh belum memenuhi gate, area tersebut wajib memenuhi gate dalam PR yang sama. Pelanggaran lama di luar lingkup perubahan tetap dilacak pada issue pemiliknya dan dituntaskan di batch yang ditetapkan: keyboard #3, dialog #4, zoom #5, payload #9, timer #10, dan kontras #11. Review mencatat area yang diuji, issue baseline yang masih terbuka, dan bukti non-regresi. Pengecualian baseline ini tidak menghapus larangan secret, dokumen internal baru, atau syarat scan, review, dan QA.
 
 - [ ] Satu tujuan, ≤ ±400 baris perubahan (lockfile generated dikecualikan), Conventional Commits + nomor issue.
 - [ ] `npm run lint` LULUS (batas LoC, pola terlarang).
